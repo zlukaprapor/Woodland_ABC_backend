@@ -1,0 +1,32 @@
+# Python
+*.pyc
+*.pyo
+__pycache__
+venv/
+.env
+*.db
+*.sqlite3
+
+# FastAPI
+*.log
+
+# Node.js
+node_modules/
+build/
+dist/
+*.log
+*.tsbuildinfo
+
+# IDEs
+.vscode/
+.idea/
+
+# Docker
+docker-compose.override.yml
+*.env
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
