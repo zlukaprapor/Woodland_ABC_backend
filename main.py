@@ -1,13 +1,11 @@
 from fastapi import FastAPI
+from app.db.database import engine, Base
+from app.api.v1.routes import auth
 
 app = FastAPI()
 
+# Створення таблиць у базі даних
+Base.metadata.create_all(bind=engine)
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+# Додавання маршруту до додатку
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
