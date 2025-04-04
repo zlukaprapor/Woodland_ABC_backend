@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.services.user_service import get_user_by_email, create_user
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserLogin
+from app.core.security import verify_password, create_access_token
 
 router = APIRouter()
 
@@ -16,3 +17,12 @@ async def register_user(user: UserCreate, db: Session = Depends(get_db)):
     # Створення нового користувача
     new_user = create_user(db, user)
     return {"message": "User created successfully", "user": new_user}
+
+@router.post("/login")
+async def login_user(user: UserLogin, db: Session = Depends(get_db)):
+    db_user = get_user_by_email(db, user.email)
+    if not db_user or not verify_password(user.password, db_user.password_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+    access_token = create_access_token(data={"sub": db_user.email})
+    return {"access_token": access_token, "token_type": "bearer"}
