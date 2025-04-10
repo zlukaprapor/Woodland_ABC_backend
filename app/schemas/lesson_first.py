@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List, Optional
 
 class LessonFirstResponse(BaseModel):
     id: int
@@ -9,5 +10,12 @@ class LessonFirstResponse(BaseModel):
     object_image: str
     audio_file: str
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
+
+class LessonFirstListResponse(BaseModel):
+    items: List[LessonFirstResponse]
+    total: int
+    skip: int
+    limit: int
