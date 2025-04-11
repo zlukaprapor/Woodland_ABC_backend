@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 
 # Створення папки media, якщо її нема
-os.makedirs("media", exist_ok=True)
+# os.makedirs("media", exist_ok=True)
 
 # Створення таблиць у базі даних
 Base.metadata.create_all(bind=engine)
@@ -21,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/media", StaticFiles(directory="media"), name="media")
+# app.mount("/media", StaticFiles(directory="media"), name="media")
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
 app.include_router(lesson_first.router, prefix="/api/v1/lessons_first", tags=["Lessons Upload"])
