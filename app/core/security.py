@@ -5,13 +5,11 @@ from typing import Optional, Dict, Any
 import os
 from dotenv import load_dotenv
 
-# Завантаження змінних середовища з файлу .env
 load_dotenv()
 
-# Отримуємо значення SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES з середовища
-SECRET_KEY = os.getenv("SECRET_KEY", "12345678")  # Якщо змінна не знайдена, буде використано "default_secret_key"
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
