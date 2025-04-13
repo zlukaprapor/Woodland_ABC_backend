@@ -1,23 +1,32 @@
 from fastapi import APIRouter, Depends, Form, UploadFile, HTTPException, Query, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import Optional
+
 from app.db.database import get_db
+from app.core.dependencies import get_current_admin_user
 from app.services.lesson_service import (
     create_lesson_with_files,
     update_lesson_with_files,
     delete_lesson,
-    get_all_lessons
+    get_all_lessons,
+    get_lesson_by_letter,
+    get_lesson_by_id
 )
 from app.schemas.lesson_first import LessonFirstResponse, LessonFirstListResponse
-from app.models.lesson_first import LessonFirstDB
+
 
 router = APIRouter()
 
-
-@router.post("/create-with-files", response_model=LessonFirstResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/create-with-files",
+    response_model=LessonFirstResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(get_current_admin_user)]
+)
 def create_lesson_with_media(
-        letter_upper: str = Form(...),
-        letter_lower: str = Form(...),
+        letter_upper: str = Form(..., min_length=1, max_length=1),
+        letter_lower: str = Form(..., min_length=1, max_length=1),
         description: str = Form(...),
         letter_image: UploadFile = Form(...),
         object_image: UploadFile = Form(...),
@@ -25,35 +34,6 @@ def create_lesson_with_media(
         db: Session = Depends(get_db),
 ):
     """Створення нового уроку з файлами"""
-    # Валідація букв
-    if len(letter_upper) != 1 or len(letter_lower) != 1:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Літери повинні бути одиночними символами"
-        )
-
-    # Валідація розширень файлів
-    valid_image_types = ["image/jpeg", "image/png", "image/webp"]
-    valid_audio_types = ["audio/mpeg", "audio/mp3", "audio/wav"]
-
-    if letter_image.content_type not in valid_image_types:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Зображення літери повинно бути в форматі JPEG, PNG або WEBP"
-        )
-
-    if object_image.content_type not in valid_image_types:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Зображення об'єкта повинно бути в форматі JPEG, PNG або WEBP"
-        )
-
-    if audio_file.content_type not in valid_audio_types:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Аудіо файл повинен бути в форматі MP3 або WAV"
-        )
-
     try:
         return create_lesson_with_files(
             db=db,
@@ -64,18 +44,23 @@ def create_lesson_with_media(
             object_image=object_image,
             audio_file=audio_file,
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Помилка при створенні уроку: {str(e)}"
         )
 
-
-@router.put("/{lesson_id}", response_model=LessonFirstResponse)
+@router.put(
+    "/{lesson_id}",
+    response_model=LessonFirstResponse,
+    dependencies=[Depends(get_current_admin_user)]
+)
 def update_lesson(
         lesson_id: int,
-        letter_upper: Optional[str] = Form(None),
-        letter_lower: Optional[str] = Form(None),
+        letter_upper: Optional[str] = Form(None, min_length=1, max_length=1),
+        letter_lower: Optional[str] = Form(None, min_length=1, max_length=1),
         description: Optional[str] = Form(None),
         letter_image: Optional[UploadFile] = Form(None),
         object_image: Optional[UploadFile] = Form(None),
@@ -83,52 +68,6 @@ def update_lesson(
         db: Session = Depends(get_db),
 ):
     """Оновлення існуючого уроку"""
-    # Перевіряємо, чи існує урок
-    lesson = db.query(LessonFirstDB).get(lesson_id)
-    if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Урок не знайдено"
-        )
-
-    # Валідація букв, якщо вони передані
-    if letter_upper is not None and len(letter_upper) != 1:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Велика літера повинна бути одиночним символом"
-        )
-
-    if letter_lower is not None and len(letter_lower) != 1:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Мала літера повинна бути одиночним символом"
-        )
-
-    # Валідація файлів, якщо вони передані
-    if letter_image is not None:
-        valid_image_types = ["image/jpeg", "image/png", "image/webp"]
-        if letter_image.content_type not in valid_image_types:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Зображення літери повинно бути в форматі JPEG, PNG або WEBP"
-            )
-
-    if object_image is not None:
-        valid_image_types = ["image/jpeg", "image/png", "image/webp"]
-        if object_image.content_type not in valid_image_types:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Зображення об'єкта повинно бути в форматі JPEG, PNG або WEBP"
-            )
-
-    if audio_file is not None:
-        valid_audio_types = ["audio/mpeg", "audio/mp3", "audio/wav"]
-        if audio_file.content_type not in valid_audio_types:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Аудіо файл повинен бути в форматі MP3 або WAV"
-            )
-
     try:
         return update_lesson_with_files(
             db=db,
@@ -140,35 +79,37 @@ def update_lesson(
             object_image=object_image,
             audio_file=audio_file,
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Помилка при оновленні уроку: {str(e)}"
         )
 
-
-@router.delete("/{lesson_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{lesson_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(get_current_admin_user)]
+)
 def remove_lesson(
         lesson_id: int,
         db: Session = Depends(get_db),
 ):
     """Видалення уроку за ID"""
-    lesson = db.query(LessonFirstDB).get(lesson_id)
-    if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Урок не знайдено"
-        )
-
     try:
         delete_lesson(db=db, lesson_id=lesson_id)
-        return {"message": "Урок успішно видалено"}
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": "Урок успішно видалено"}
+        )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Помилка при видаленні уроку: {str(e)}"
         )
-
 
 @router.get("/", response_model=LessonFirstListResponse)
 def list_lessons(
@@ -191,44 +132,42 @@ def list_lessons(
             "skip": skip,
             "limit": limit
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Помилка при отриманні списку уроків: {str(e)}"
         )
 
-
 @router.get("/get-by-letter", response_model=LessonFirstResponse)
-def get_lesson_by_letter(
-        letter_upper: str = Query(..., description="Велика літера"),
+def get_lesson_by_letter_route(
+        letter_upper: str = Query(..., min_length=1, max_length=1, description="Велика літера"),
         db: Session = Depends(get_db),
 ):
     """Отримання уроку за великою літерою"""
-    if len(letter_upper) != 1:
+    try:
+        return get_lesson_by_letter(db, letter_upper)
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Літера повинна бути одиночним символом"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Помилка при отриманні уроку за літерою: {str(e)}"
         )
-
-    lesson = db.query(LessonFirstDB).filter_by(letter_upper=letter_upper).first()
-    if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Літеру не знайдено"
-        )
-    return lesson
-
 
 @router.get("/{lesson_id}", response_model=LessonFirstResponse)
-def get_lesson_by_id(
+def get_lesson_by_id_route(
         lesson_id: int,
         db: Session = Depends(get_db),
 ):
     """Отримання уроку за ID"""
-    lesson = db.query(LessonFirstDB).get(lesson_id)
-    if not lesson:
+    try:
+        return get_lesson_by_id(db, lesson_id)
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Урок не знайдено"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Помилка при отриманні уроку за ID: {str(e)}"
         )
-    return lesson

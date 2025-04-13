@@ -1,17 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-import os
-from dotenv import load_dotenv
-
-load_dotenv()  # Завантажуємо змінні середовища з файлу .env
-
-# Перевірка наявності DATABASE_URL в змінних середовища
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL not found in environment variables")
+from app.core.config import settings
 
 # Створення об'єкта engine для підключення до бази даних
-engine = create_engine(DATABASE_URL)
+engine = create_engine(settings.DATABASE_URL)
 
 # Створення сесії
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -26,7 +18,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-# Створення таблиць (якщо вони не існують)
-# Це потрібно для того, щоб таблиці були створені автоматично в базі даних
-Base.metadata.create_all(bind=engine)
