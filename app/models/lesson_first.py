@@ -1,13 +1,19 @@
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, UniqueConstraint
 from app.db.database import Base
+
 
 class LessonFirstDB(Base):
     __tablename__ = "lesson_first"
 
     id = Column(Integer, primary_key=True, index=True)
-    letter_upper = Column(String, unique=True, nullable=False)
-    letter_lower = Column(String, nullable=False)
+    letter_upper = Column(String(1), unique=True, nullable=False, index=True)
+    letter_lower = Column(String(1), nullable=False)
     description = Column(Text)
-    letter_image = Column(String)
-    object_image = Column(String)
-    audio_file = Column(String)
+    letter_image = Column(String, nullable=False)
+    object_image = Column(String, nullable=False)
+    audio_file = Column(String, nullable=False)
+
+    # Додаємо обмеження, що літера має бути унікальною
+    __table_args__ = (
+        UniqueConstraint('letter_upper', name='unique_letter_upper'),
+    )
