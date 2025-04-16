@@ -3,11 +3,18 @@ from app.models.user import User, UserRole
 from app.schemas.user import UserCreate
 from app.core.security import hash_password
 from fastapi import HTTPException, status
-
+from app.core.logger import logger
 
 def get_user_by_email(db: Session, email: str) -> User:
     """Отримує користувача за email"""
-    return db.query(User).filter(User.email == email).first()
+    try:
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            logger.warning(f"Користувача з email {email} не знайдено")
+        return user
+    except Exception as e:
+        logger.error(f"Помилка при пошуку користувача: {str(e)}")
+        raise
 
 
 def get_user_by_username(db: Session, username: str) -> User:

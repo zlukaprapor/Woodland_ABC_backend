@@ -4,6 +4,8 @@ from app.api.v1.routes import auth, lesson_first
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
+from app.core.logger import logger
+
 
 # Створення таблиць у базі даних
 Base.metadata.create_all(bind=engine)
@@ -35,3 +37,11 @@ app.include_router(lesson_first.router, prefix="/api/v1/lessons_first", tags=["�
 @app.get("/")
 def root():
     return {"status": "API працює", "version": "1.0.0"}
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("🚀 Програма запущена")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.info("🛑 Програма зупинена")
