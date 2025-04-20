@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import UploadFile, HTTPException, status
 from typing import Optional, Tuple, List
-from app.models.lesson_first import LessonFirstDB
+from app.models.lesson import LessonFirstDB
 from app.utils.file_utils import save_upload_file, delete_file_if_exists, validate_file_type
 from app.core.config import settings
 

@@ -13,7 +13,7 @@ from app.services.lesson_service import (
     get_lesson_by_letter,
     get_lesson_by_id
 )
-from app.schemas.lesson_first import LessonFirstResponse, LessonFirstListResponse
+from app.schemas.lesson import LessonFirstResponse, LessonFirstListResponse
 
 
 router = APIRouter()
@@ -22,7 +22,7 @@ router = APIRouter()
     "/create-with-files",
     response_model=LessonFirstResponse,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(get_current_admin_user)]
+    #dependencies=[Depends(get_current_admin_user)]
 )
 def create_lesson_with_media(
         letter_upper: str = Form(..., min_length=1, max_length=1),

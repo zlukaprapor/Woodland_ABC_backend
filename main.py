@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.db.database import engine, Base
-from app.api.v1.routes import auth, lesson_first
+from app.api.v1.routes import auth, lesson
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
@@ -31,7 +31,7 @@ app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIRECTORY), name="me
 
 # Включення роутерів
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Автентифікація"])
-app.include_router(lesson_first.router, prefix="/api/v1/lessons_first", tags=["Уроки"])
+app.include_router(lesson.router, prefix="/api/v1/lessons", tags=["Уроки"])
 
 # Кореневий ендпоінт для перевірки працездатності API
 @app.get("/")

@@ -3,7 +3,7 @@ from app.db.database import Base
 
 
 class LessonFirstDB(Base):
-    __tablename__ = "lesson_first"
+    __tablename__ = "lesson"
 
     id = Column(Integer, primary_key=True, index=True)
     letter_upper = Column(String(1), unique=True, nullable=False, index=True)
