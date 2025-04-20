@@ -10,3 +10,14 @@ logging.StreamHandler(), # Вивід у консоль
 logging.FileHandler("logs/app.log", encoding="utf-8")]) # Логи вфайл
 
 logger = logging.getLogger("app")
+
+
+
+
+
+
+
+
+
+
+
