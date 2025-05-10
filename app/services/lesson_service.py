@@ -11,8 +11,12 @@ def create_lesson_with_files(
         letter_upper: str,
         letter_lower: str,
         description: str,
+        training: str,
+        regulations: str,
         letter_image: UploadFile,
-        object_image: UploadFile,
+        object_image_first: UploadFile,
+        object_image_second: UploadFile,
+        object_image_third: UploadFile,
         audio_file: UploadFile,
 ) -> LessonFirstDB:
     """Створює новий урок з файлами"""
@@ -26,7 +30,9 @@ def create_lesson_with_files(
 
     # Валідація файлів
     validate_file_type(letter_image, settings.VALID_IMAGE_TYPES)
-    validate_file_type(object_image, settings.VALID_IMAGE_TYPES)
+    validate_file_type(object_image_first, settings.VALID_IMAGE_TYPES)
+    validate_file_type(object_image_second, settings.VALID_IMAGE_TYPES)
+    validate_file_type(object_image_third, settings.VALID_IMAGE_TYPES)
     validate_file_type(audio_file, settings.VALID_AUDIO_TYPES)
 
     try:
@@ -34,8 +40,14 @@ def create_lesson_with_files(
         letter_image_path = save_upload_file(
             letter_image, f"{settings.LETTER_SUBDIRECTORY}/{letter_upper}"
         )
-        object_image_path = save_upload_file(
-            object_image, f"{settings.OBJECT_SUBDIRECTORY}/{letter_upper}"
+        object_image_path_first = save_upload_file(
+            object_image_first, f"{settings.OBJECT_SUBDIRECTORY}/{letter_upper}"
+        )
+        object_image_path_second = save_upload_file(
+            object_image_second, f"{settings.OBJECT_SUBDIRECTORY}/{letter_upper}"
+        )
+        object_image_path_third = save_upload_file(
+            object_image_third, f"{settings.OBJECT_SUBDIRECTORY}/{letter_upper}"
         )
         audio_file_path = save_upload_file(
             audio_file, f"{settings.AUDIO_SUBDIRECTORY}/{letter_upper}"
@@ -46,8 +58,12 @@ def create_lesson_with_files(
             letter_upper=letter_upper,
             letter_lower=letter_lower,
             description=description,
+            training=training,
+            regulations=regulations,
             letter_image=letter_image_path,
-            object_image=object_image_path,
+            object_image_first=object_image_path_first,
+            object_image_second=object_image_path_second,
+            object_image_third=object_image_path_third,
             audio_file=audio_file_path
         )
 
@@ -59,7 +75,9 @@ def create_lesson_with_files(
     except Exception as e:
         # Якщо виникла помилка, видаляємо файли, які могли бути збережені
         delete_file_if_exists(letter_image_path if 'letter_image_path' in locals() else None)
-        delete_file_if_exists(object_image_path if 'object_image_path' in locals() else None)
+        delete_file_if_exists(object_image_path_first if 'object_image_path_first' in locals() else None)
+        delete_file_if_exists(object_image_path_second if 'object_image_path_second' in locals() else None)
+        delete_file_if_exists(object_image_path_third if 'object_image_path_third' in locals() else None)
         delete_file_if_exists(audio_file_path if 'audio_file_path' in locals() else None)
 
         # Піднімаємо помилку вище
@@ -75,8 +93,12 @@ def update_lesson_with_files(
         letter_upper: Optional[str] = None,
         letter_lower: Optional[str] = None,
         description: Optional[str] = None,
+        training: Optional[str] = None,
+        regulations: Optional[str] = None,
         letter_image: Optional[UploadFile] = None,
-        object_image: Optional[UploadFile] = None,
+        object_image_first: Optional[UploadFile] = None,
+        object_image_second: Optional[UploadFile] = None,
+        object_image_third: Optional[UploadFile] = None,
         audio_file: Optional[UploadFile] = None,
 ) -> LessonFirstDB:
     """Оновлює існуючий урок з файлами"""
@@ -105,7 +127,10 @@ def update_lesson_with_files(
             lesson.letter_lower = letter_lower
         if description is not None:
             lesson.description = description
-
+        if training is not None:
+            lesson.training = training
+        if regulations is not None:
+            lesson.regulations = regulations
         # Оновити файли, якщо вони надані
         if letter_image is not None:
             validate_file_type(letter_image, settings.VALID_IMAGE_TYPES)
@@ -114,11 +139,25 @@ def update_lesson_with_files(
                 letter_image, f"{settings.LETTER_SUBDIRECTORY}/{lesson.letter_upper}"
             )
 
-        if object_image is not None:
-            validate_file_type(object_image, settings.VALID_IMAGE_TYPES)
+        if object_image_first is not None:
+            validate_file_type(object_image_first, settings.VALID_IMAGE_TYPES)
             delete_file_if_exists(lesson.object_image)
             lesson.object_image = save_upload_file(
-                object_image, f"{settings.OBJECT_SUBDIRECTORY}/{lesson.letter_upper}"
+                object_image_first, f"{settings.OBJECT_SUBDIRECTORY}/{lesson.letter_upper}"
+            )
+
+        if object_image_second is not None:
+            validate_file_type(object_image_second, settings.VALID_IMAGE_TYPES)
+            delete_file_if_exists(lesson.object_image)
+            lesson.object_image = save_upload_file(
+                object_image_second, f"{settings.OBJECT_SUBDIRECTORY}/{lesson.letter_upper}"
+            )
+
+        if object_image_third is not None:
+            validate_file_type(object_image_third, settings.VALID_IMAGE_TYPES)
+            delete_file_if_exists(lesson.object_image)
+            lesson.object_image = save_upload_file(
+                object_image_third, f"{settings.OBJECT_SUBDIRECTORY}/{lesson.letter_upper}"
             )
 
         if audio_file is not None:
@@ -152,7 +191,9 @@ def delete_lesson(db: Session, lesson_id: int) -> None:
     try:
         # Видалити файли
         delete_file_if_exists(lesson.letter_image)
-        delete_file_if_exists(lesson.object_image)
+        delete_file_if_exists(lesson.object_image_first)
+        delete_file_if_exists(lesson.object_image_second)
+        delete_file_if_exists(lesson.object_image_third)
         delete_file_if_exists(lesson.audio_file)
 
         # Видалити запис з БД
