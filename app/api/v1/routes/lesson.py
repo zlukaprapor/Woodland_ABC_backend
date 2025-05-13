@@ -35,6 +35,7 @@ def create_lesson_with_media(
         object_image_second: UploadFile = Form(...),
         object_image_third: UploadFile = Form(...),
         audio_file: UploadFile = Form(...),
+        quiz_file: UploadFile = Form(...),
         db: Session = Depends(get_db),
 ):
     """Створення нового уроку з файлами"""
@@ -51,6 +52,7 @@ def create_lesson_with_media(
             object_image_second=object_image_second,
             object_image_third=object_image_third,
             audio_file=audio_file,
+            quiz_file=quiz_file,
         )
     except HTTPException:
         raise
@@ -77,6 +79,7 @@ def update_lesson(
         object_image_second: Optional[UploadFile] = Form(None),
         object_image_third: Optional[UploadFile] = Form(None),
         audio_file: Optional[UploadFile] = Form(None),
+        quiz_file: Optional[UploadFile] = Form(None),
         db: Session = Depends(get_db),
 ):
     """Оновлення існуючого уроку"""
@@ -94,6 +97,7 @@ def update_lesson(
             object_image_second=object_image_second,
             object_image_third=object_image_third,
             audio_file=audio_file,
+            quiz_file=quiz_file,
         )
     except HTTPException:
         raise

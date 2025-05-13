@@ -16,6 +16,7 @@ class LessonFirstDB(Base):
     object_image_second = Column(String, nullable=False)
     object_image_third = Column(String, nullable=False)
     audio_file = Column(String, nullable=False)
+    quiz_file = Column(String, nullable=False)
 
     # Додаємо обмеження, що літера має бути унікальною
     __table_args__ = (

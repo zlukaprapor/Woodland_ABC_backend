@@ -25,10 +25,12 @@ class Settings(BaseSettings):
     LETTER_SUBDIRECTORY: str = "letters"
     OBJECT_SUBDIRECTORY: str = "objects"
     AUDIO_SUBDIRECTORY: str = "audio"
+    QUIZ_SUBDIRECTORY: str = "quiz"
 
     # Допустимі формати файлів
     VALID_IMAGE_TYPES: list[str] = ["image/jpeg", "image/png", "image/webp"]
     VALID_AUDIO_TYPES: list[str] = ["audio/mpeg", "audio/mp3", "audio/wav"]
+    VALID_QUIZ_TYPES: list[str] = ["application/json"]
 
     class Config:
         env_file = ".env"

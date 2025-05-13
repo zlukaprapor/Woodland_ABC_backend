@@ -34,6 +34,7 @@ app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIRECTORY), name="me
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Автентифікація"])
 app.include_router(lesson.router, prefix="/api/v1/lessons", tags=["Уроки"])
 app.include_router(progress.router, prefix="/api/v1/progress", tags=["Прогрес"])
+
 # Кореневий ендпоінт для перевірки працездатності API
 @app.get("/")
 def root():
