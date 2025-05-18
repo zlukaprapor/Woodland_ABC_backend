@@ -7,3 +7,8 @@ python-dotenv~=1.1.0
 jose~=1.0.0
 python-jose~=3.4.0
 pydantic-settings~=2.8.1
+pillow~=11.2.1
+uvicorn~=0.34.0
+psycopg2-binary
+email-validator
+python-multipart

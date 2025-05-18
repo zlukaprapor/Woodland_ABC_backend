@@ -3,29 +3,44 @@ from app.models.user import UserRole
 
 
 class UserBase(BaseModel):
-    email: EmailStr
-    username: str = Field(..., min_length=3, max_length=50)
+    """
+    Загальна базова схема користувача.
+    """
+    email: EmailStr = Field(..., description="Email користувача")
+    username: str = Field(..., min_length=3, max_length=50, description="Ім'я користувача")
 
 
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=8)
+    """
+    Схема для створення нового користувача.
+    """
+    password: str = Field(..., min_length=8, description="Пароль користувача")
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
+    """
+    Схема для аутентифікації користувача (логін).
+    """
+    email: EmailStr = Field(..., description="Email користувача")
+    password: str = Field(..., description="Пароль користувача")
 
 
 class UserResponse(UserBase):
-    id: int
-    role: UserRole
-    is_active: bool
+    """
+    Схема відповіді з даними користувача.
+    """
+    id: int = Field(..., description="Унікальний ідентифікатор користувача")
+    role: UserRole = Field(..., description="Роль користувача")
+    is_active: bool = Field(..., description="Статус активності користувача")
 
     class Config:
-        from_attributes = True
+        from_attributes = True  # Автоматичне створення з ORM моделей
 
 
 class Token(BaseModel):
-    access_token: str
-    token_type: str
-    user: UserResponse
+    """
+    Схема для JWT токена та пов’язаної інформації про користувача.
+    """
+    access_token: str = Field(..., description="JWT токен доступу")
+    token_type: str = Field(..., description="Тип токена, зазвичай 'bearer'")
+    user: UserResponse = Field(..., description="Дані користувача, що відповідають токену")

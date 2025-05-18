@@ -2,36 +2,53 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 
 class LessonFirstBase(BaseModel):
-    letter_upper: str = Field(..., min_length=1, max_length=1)
-    letter_lower: str = Field(..., min_length=1, max_length=1)
-    description: str
-    training: str
-    regulations: str
+    """
+    Базова схема для уроку з основними текстовими полями.
+    """
+    letter_upper: str = Field(..., min_length=1, max_length=1, description="Велика літера (один символ)")
+    letter_lower: str = Field(..., min_length=1, max_length=1, description="Мала літера (один символ)")
+    description: str = Field(..., description="Опис уроку")
+    training: str = Field(..., description="Текст тренування")
+    regulations: str = Field(..., description="Регламенти уроку")
 
 class LessonFirstCreate(LessonFirstBase):
+    """
+    Схема для створення нового уроку.
+    Наслідує всі поля базової схеми.
+    """
     pass
 
 class LessonFirstUpdate(BaseModel):
-    letter_upper: Optional[str] = Field(None, min_length=1, max_length=1)
-    letter_lower: Optional[str] = Field(None, min_length=1, max_length=1)
-    description: Optional[str] = None
-    training: Optional[str] = None
-    regulations: Optional[str] = None
+    """
+    Схема для оновлення уроку.
+    Всі поля необов’язкові, можна оновлювати частково.
+    """
+    letter_upper: Optional[str] = Field(None, min_length=1, max_length=1, description="Велика літера (один символ)")
+    letter_lower: Optional[str] = Field(None, min_length=1, max_length=1, description="Мала літера (один символ)")
+    description: Optional[str] = Field(None, description="Опис уроку")
+    training: Optional[str] = Field(None, description="Текст тренування")
+    regulations: Optional[str] = Field(None, description="Регламенти уроку")
 
 class LessonFirstResponse(LessonFirstBase):
-    id: int
-    letter_image: Optional[str] = None
-    object_image_first: Optional[str] = None
-    object_image_second: Optional[str] = None
-    object_image_third: Optional[str] = None
-    audio_file: Optional[str] = None
-    quiz_file: Optional[str] = None
+    """
+    Схема відповіді для уроку з додатковими полями файлів і ID.
+    """
+    id: int = Field(..., description="Унікальний ідентифікатор уроку")
+    letter_image: Optional[str] = Field(None, description="Шлях або URL до зображення великої літери")
+    object_image_first: Optional[str] = Field(None, description="Шлях або URL до першого об’єктного зображення")
+    object_image_second: Optional[str] = Field(None, description="Шлях або URL до другого об’єктного зображення")
+    object_image_third: Optional[str] = Field(None, description="Шлях або URL до третього об’єктного зображення")
+    audio_file: Optional[str] = Field(None, description="Шлях або URL до аудіофайлу")
+    quiz_file: Optional[str] = Field(None, description="Шлях або URL до файлу з вікториною")
 
     class Config:
-        from_attributes = True
+        from_attributes = True  # Дозволяє створювати схему із ORM моделей
 
 class LessonFirstListResponse(BaseModel):
-    items: List[LessonFirstResponse]
-    total: int
-    skip: int
-    limit: int
+    """
+    Схема для відповіді зі списком уроків з пагінацією.
+    """
+    items: List[LessonFirstResponse] = Field(..., description="Список уроків")
+    total: int = Field(..., description="Загальна кількість уроків")
+    skip: int = Field(..., description="Кількість пропущених записів (offset)")
+    limit: int = Field(..., description="Ліміт записів на сторінку")

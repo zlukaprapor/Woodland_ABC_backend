@@ -22,23 +22,31 @@ router = APIRouter()
     "/create-with-files",
     response_model=LessonFirstResponse,
     status_code=status.HTTP_201_CREATED,
-    #dependencies=[Depends(get_current_admin_user)]
+    #dependencies=[Depends(get_current_admin_user)],
+    summary="Створити урок з файлами",
+    description=(
+        "Створює новий урок з повним набором медіафайлів:\n"
+        "- верхня та нижня літери\n"
+        "- опис, тренування, регламенти\n"
+        "- зображення (літера, три об'єкти)\n"
+        "- аудіо та файл тесту\n\n"
+        "Параметри приймаються як multipart/form-data."
+    )
 )
 def create_lesson_with_media(
-        letter_upper: str = Form(..., min_length=1, max_length=1),
-        letter_lower: str = Form(..., min_length=1, max_length=1),
-        description: str = Form(...),
-        training: str = Form(...),
-        regulations: str = Form(...),
-        letter_image: UploadFile = Form(...),
-        object_image_first: UploadFile = Form(...),
-        object_image_second: UploadFile = Form(...),
-        object_image_third: UploadFile = Form(...),
-        audio_file: UploadFile = Form(...),
-        quiz_file: UploadFile = Form(...),
+        letter_upper: str = Form(..., min_length=1, max_length=1, description="Верхня літера"),
+        letter_lower: str = Form(..., min_length=1, max_length=1, description="Нижня літера"),
+        description: str = Form(..., description="Опис уроку"),
+        training: str = Form(..., description="Матеріали для тренування"),
+        regulations: str = Form(..., description="Правила"),
+        letter_image: UploadFile = Form(..., description="Зображення літери"),
+        object_image_first: UploadFile = Form(..., description="Зображення першого об'єкта"),
+        object_image_second: UploadFile = Form(..., description="Зображення другого об'єкта"),
+        object_image_third: UploadFile = Form(..., description="Зображення третього об'єкта"),
+        audio_file: UploadFile = Form(..., description="Аудіофайл"),
+        quiz_file: UploadFile = Form(..., description="Файл тесту"),
         db: Session = Depends(get_db),
 ):
-    """Створення нового уроку з файлами"""
     try:
         return create_lesson_with_files(
             db=db,
@@ -62,27 +70,32 @@ def create_lesson_with_media(
             detail=f"Помилка при створенні уроку: {str(e)}"
         )
 
+
 @router.put(
     "/{lesson_id}",
     response_model=LessonFirstResponse,
-    dependencies=[Depends(get_current_admin_user)]
+    dependencies=[Depends(get_current_admin_user)],
+    summary="Оновити урок",
+    description=(
+        "Оновлює існуючий урок за ID.\n"
+        "Підтримується часткове оновлення: можна передати будь-які поля або файли."
+    )
 )
 def update_lesson(
         lesson_id: int,
-        letter_upper: Optional[str] = Form(None, min_length=1, max_length=1),
-        letter_lower: Optional[str] = Form(None, min_length=1, max_length=1),
-        description: Optional[str] = Form(None),
-        training: Optional[str] = Form(None),
-        regulations: Optional[str] = Form(None),
-        letter_image: Optional[UploadFile] = Form(None),
-        object_image_first: Optional[UploadFile] = Form(None),
-        object_image_second: Optional[UploadFile] = Form(None),
-        object_image_third: Optional[UploadFile] = Form(None),
-        audio_file: Optional[UploadFile] = Form(None),
-        quiz_file: Optional[UploadFile] = Form(None),
+        letter_upper: Optional[str] = Form(None, min_length=1, max_length=1, description="Верхня літера"),
+        letter_lower: Optional[str] = Form(None, min_length=1, max_length=1, description="Нижня літера"),
+        description: Optional[str] = Form(None, description="Опис уроку"),
+        training: Optional[str] = Form(None, description="Матеріали для тренування"),
+        regulations: Optional[str] = Form(None, description="Правила"),
+        letter_image: Optional[UploadFile] = Form(None, description="Зображення літери"),
+        object_image_first: Optional[UploadFile] = Form(None, description="Зображення першого об'єкта"),
+        object_image_second: Optional[UploadFile] = Form(None, description="Зображення другого об'єкта"),
+        object_image_third: Optional[UploadFile] = Form(None, description="Зображення третього об'єкта"),
+        audio_file: Optional[UploadFile] = Form(None, description="Аудіофайл"),
+        quiz_file: Optional[UploadFile] = Form(None, description="Файл тесту"),
         db: Session = Depends(get_db),
 ):
-    """Оновлення існуючого уроку"""
     try:
         return update_lesson_with_files(
             db=db,
@@ -107,16 +120,18 @@ def update_lesson(
             detail=f"Помилка при оновленні уроку: {str(e)}"
         )
 
+
 @router.delete(
     "/{lesson_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(get_current_admin_user)]
+    dependencies=[Depends(get_current_admin_user)],
+    summary="Видалити урок",
+    description="Видаляє урок за заданим ID."
 )
 def remove_lesson(
         lesson_id: int,
         db: Session = Depends(get_db),
 ):
-    """Видалення уроку за ID"""
     try:
         delete_lesson(db=db, lesson_id=lesson_id)
         return JSONResponse(
@@ -131,14 +146,19 @@ def remove_lesson(
             detail=f"Помилка при видаленні уроку: {str(e)}"
         )
 
-@router.get("/", response_model=LessonFirstListResponse)
+
+@router.get(
+    "/",
+    response_model=LessonFirstListResponse,
+    summary="Список уроків",
+    description="Отримання списку уроків з підтримкою пагінації та фільтрації за літерою."
+)
 def list_lessons(
         skip: int = Query(0, ge=0, description="Кількість записів для пропуску (пагінація)"),
         limit: int = Query(10, ge=1, le=100, description="Кількість записів для отримання (пагінація)"),
         letter_filter: Optional[str] = Query(None, description="Фільтр за літерою"),
         db: Session = Depends(get_db)
 ):
-    """Отримання списку всіх уроків з можливістю пагінації та фільтрації"""
     try:
         lessons, total = get_all_lessons(
             db=db,
@@ -160,12 +180,17 @@ def list_lessons(
             detail=f"Помилка при отриманні списку уроків: {str(e)}"
         )
 
-@router.get("/get-by-letter", response_model=LessonFirstResponse)
+
+@router.get(
+    "/get-by-letter",
+    response_model=LessonFirstResponse,
+    summary="Отримати урок за літерою",
+    description="Повертає урок за великою літерою."
+)
 def get_lesson_by_letter_route(
         letter_upper: str = Query(..., min_length=1, max_length=1, description="Велика літера"),
         db: Session = Depends(get_db),
 ):
-    """Отримання уроку за великою літерою"""
     try:
         return get_lesson_by_letter(db, letter_upper)
     except HTTPException:
@@ -176,12 +201,17 @@ def get_lesson_by_letter_route(
             detail=f"Помилка при отриманні уроку за літерою: {str(e)}"
         )
 
-@router.get("/{lesson_id}", response_model=LessonFirstResponse)
+
+@router.get(
+    "/{lesson_id}",
+    response_model=LessonFirstResponse,
+    summary="Отримати урок за ID",
+    description="Повертає урок за його унікальним ID."
+)
 def get_lesson_by_id_route(
         lesson_id: int,
         db: Session = Depends(get_db),
 ):
-    """Отримання уроку за ID"""
     try:
         return get_lesson_by_id(db, lesson_id)
     except HTTPException:
