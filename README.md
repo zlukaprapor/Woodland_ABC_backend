@@ -69,7 +69,7 @@ backend/
    docker-compose up --build
    ```
   ```bash
-  docker exec -i postgres-db psql -U postgres -d mydatabase < backup.sql  <----в базу
+  docker exec -i postgres-db psql -U postgres -d mydatabase < postgres_localhost-2025_05_21_23_21_12-dump.sql  <----в базу
   docker exec -t postgres-db pg_dump -U postgres -d postgres > backup.sql  <----c бази
   ```
 ---
