@@ -52,7 +52,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # Налаштування CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:8000", "http://localhost:5173"]
+    CORS_ORIGINS: list[str] = ["http://localhost:8000", "http://localhost:3000", "http://localhost:5173"]
 
     # Директорії для файлів
     UPLOAD_DIRECTORY: str = "uploads"
