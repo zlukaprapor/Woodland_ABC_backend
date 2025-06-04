@@ -67,6 +67,8 @@ backend/
    ```bash
    docker-compose build backend
    docker-compose up --build
+   docker-compose down
+
    ```
   ```bash
   docker exec -i postgres-db psql -U postgres -c "\l" <----список
